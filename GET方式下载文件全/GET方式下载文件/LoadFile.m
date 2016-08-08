@@ -82,6 +82,9 @@
     
     NSLog(@"下载完成");
     
+    //在下载响应完成时,将该二进制数据保存到指定的位置,公司开发的话会保存到沙盒,
+    [self.dataM writeToFile:@"/Users/xmy/Desktop/sougou.zip" atomically:true];
+    
 }
 /**
  *  下载失败的方法
