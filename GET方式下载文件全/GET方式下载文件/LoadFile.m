@@ -23,15 +23,21 @@
  */
 @property(assign,nonatomic)long long currentLength;
 /**
+    第一种方式:
  *  定义一个可变的二进制data ,用于接收每一次下载的数据大小
  */
 //@property(strong,nonatomic)NSMutableData *dataM;
+
+/**
+ *  第三种方式:输出流
+ */
+@property(strong,nonatomic)NSOutputStream *stream;
 
 
 @end
 
 @implementation LoadFile
-//分类方法
+//写分类方法
 - (void)loadFileUrlString:(NSString *)urlstring;
 {
     NSURL *url = [NSURL URLWithString:urlstring];
@@ -57,6 +63,7 @@
 //    }];
 }
 /**
+    第二种方式:
  *   保存每一次下载的数据
      利用文件句柄NSFileHandle
      要解决内存峰值过高,需要下载一点就保存一点
@@ -93,6 +100,19 @@
 {
     self.expectedLength = response.expectedContentLength;
     NSLog(@"%@",response);
+    
+     NSString *filePath = @"/Users/xmy/Desktop/sougou.zip";
+    /**
+     *  第三种方式:输出流
+     先定义一个全局
+     初始化输出流 并打开管道
+     第一个参数 文件存入的路径
+     第二个参数 是否往后面拼接路径
+     */
+    
+    self.stream = [NSOutputStream outputStreamToFileAtPath:filePath append:true];
+    //打开管道
+    [self.stream open];
 }
 /**
  已经收到数据的时候才会调用这个方法
@@ -105,10 +125,14 @@
     float proceress = (float)self.currentLength / self.expectedLength;
     NSLog(@"收到的数据 %f %lu",proceress,data.length);
     
+    //将数据通过输出流管道写入文件
+    //参数1:8位的二进制数据    参数二:写入的最大大小
+    [self.stream write:data.bytes maxLength:data.length];
+    
     //往可变的二进制文件里拼接数据
    // [self.dataM appendData:data];
     //将数据存入到需要下载的文件里
-    [self saveData:data];
+   // [self saveData:data];
 }
 /**
  这次连接结束的时候会调用这个方法
@@ -117,6 +141,8 @@
 - (void)connectionDidFinishLoading:(NSURLConnection *)connection{
     
     NSLog(@"下载完成");
+    //关闭管道
+    [self.stream close];
     
     //在下载响应完成时,将该二进制数据保存到指定的位置,公司开发的话会保存到沙盒,
     //[self.dataM writeToFile:@"/Users/xmy/Desktop/sougou.zip" atomically:true];
@@ -128,6 +154,8 @@
 -(void)connection:(NSURLConnection *)connection didFailWithError:(NSError *)error{
     
     NSLog(@"下载失败!%@",error);
+    //关闭管道
+    [self.stream close];
 }
 
 #pragma mark - 懒加载
