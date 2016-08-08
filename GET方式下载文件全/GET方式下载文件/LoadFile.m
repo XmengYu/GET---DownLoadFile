@@ -25,19 +25,27 @@
 /**
  *  定义一个可变的二进制data ,用于接收每一次下载的数据大小
  */
-@property(strong,nonatomic)NSMutableData *dataM;
+//@property(strong,nonatomic)NSMutableData *dataM;
 
 
 @end
 
 @implementation LoadFile
+//分类方法
 - (void)loadFileUrlString:(NSString *)urlstring;
 {
     NSURL *url = [NSURL URLWithString:urlstring];
     
     NSURLRequest *request= [NSURLRequest requestWithURL:url];
     
-    [NSURLConnection connectionWithRequest:request delegate:self];
+    //下载的操作应该在子线程执行,放在主线程会卡顿
+    dispatch_async(dispatch_get_global_queue(0, 0), ^{
+        //其代理方法在运行循环中执行,而子线程是默认不开启的,需要手动开启
+        [NSURLConnection connectionWithRequest:request delegate:self];
+        //开启运行循环,这个运行循环在下载完成后会自动停止
+        [[NSRunLoop currentRunLoop] run];
+    });
+    
     
 //    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue mainQueue] completionHandler:^(NSURLResponse * _Nullable response, NSData * _Nullable data, NSError * _Nullable connectionError) {
 //        
@@ -49,8 +57,33 @@
 //    }];
 }
 /**
- *
+ *   保存每一次下载的数据
+     利用文件句柄NSFileHandle
+     要解决内存峰值过高,需要下载一点就保存一点
  */
+- (void)saveData:(NSData *)data{
+    
+    NSString *location = @"/Users/xmy/Desktop/sougou.zip";
+    
+    //创建文件句柄
+    NSFileHandle *handle = [NSFileHandle fileHandleForWritingAtPath:location];
+    
+    if(handle == nil)
+    {
+        [data writeToFile:location atomically:true];
+    }
+    else{
+        //当handle有值,说明已经开始下载了,每次下载把文件句柄移到文件的最后
+        //如果没有这句话,每次下载一点之后还是会从头开始下载
+        [handle seekToEndOfFile];
+        //如果该文件存在,将data数据存入文件
+        [handle writeData:data];
+        //写入完毕,需要关闭该文件的句柄
+        [handle closeFile];
+    }
+    
+}
+
 #pragma mark - 代理方法
 
 /**
@@ -72,7 +105,10 @@
     float proceress = (float)self.currentLength / self.expectedLength;
     NSLog(@"收到的数据 %f %lu",proceress,data.length);
     
-    [self.dataM appendData:data];
+    //往可变的二进制文件里拼接数据
+   // [self.dataM appendData:data];
+    //将数据存入到需要下载的文件里
+    [self saveData:data];
 }
 /**
  这次连接结束的时候会调用这个方法
@@ -83,7 +119,7 @@
     NSLog(@"下载完成");
     
     //在下载响应完成时,将该二进制数据保存到指定的位置,公司开发的话会保存到沙盒,
-    [self.dataM writeToFile:@"/Users/xmy/Desktop/sougou.zip" atomically:true];
+    //[self.dataM writeToFile:@"/Users/xmy/Desktop/sougou.zip" atomically:true];
     
 }
 /**
@@ -96,13 +132,13 @@
 
 #pragma mark - 懒加载
 
--(NSMutableData *)dataM{
-    
-    if(_dataM == nil){
-        
-        _dataM = [NSMutableData data];
-        
-    }
-    return _dataM;
-}
+//-(NSMutableData *)dataM{
+//    
+//    if(_dataM == nil){
+//        
+//        _dataM = [NSMutableData data];
+//        
+//    }
+//    return _dataM;
+//}
 @end
