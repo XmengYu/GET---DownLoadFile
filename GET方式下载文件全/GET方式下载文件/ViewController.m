@@ -19,9 +19,14 @@
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
     
-    NSString *str = @"http://127.0.0.1/myWeb/sougou.zip";
+}
+//下载按钮
+- (IBAction)downLoadClick:(id)sender {
     
+    NSString *str = @"http://127.0.0.1/myWeb/sougou.zip";
+    //调用分类方法下载文件
     [[LoadFile new] loadFileUrlString:str];
+    
 }
 
 - (void)didReceiveMemoryWarning {
