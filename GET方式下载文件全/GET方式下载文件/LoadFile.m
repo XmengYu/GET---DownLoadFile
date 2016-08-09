@@ -67,10 +67,13 @@
       
       NSURL *url = [NSURL URLWithString:urlstring];
       
-      NSURLRequest *request = [NSURLRequest requestWithURL:url];
+      NSMutableURLRequest *requestM = [NSMutableURLRequest requestWithURL:url];
+        
+          [requestM setValue:[NSString stringWithFormat:@"bytes=%lld-",self.currentLength] forHTTPHeaderField:@"Range"];
+          
       // 其代理方法是由运行循环监听执行的,而子线程的运行默认不开启
       self.connection =
-        [NSURLConnection connectionWithRequest:request delegate:self];
+        [NSURLConnection connectionWithRequest:requestM delegate:self];
       // 开启当前线程的运行循环.这个运行循环会在下载完毕之后自动关闭
       [[NSRunLoop currentRunLoop] run];
       
