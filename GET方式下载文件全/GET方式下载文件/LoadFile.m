@@ -23,12 +23,6 @@
  */
 @property(assign, nonatomic) long long currentLength;
 /**
-    第一种方式:
- *  定义一个可变的二进制data ,用于接收每一次下载的数据大小
- */
-//@property(strong,nonatomic)NSMutableData *dataM;
-
-/**
  *  第三种方式:输出流
  */
 @property(strong, nonatomic) NSOutputStream *stream;
@@ -50,6 +44,28 @@
 @end
 
 @implementation LoadFile
+/**
+ *  解决block循环引用问题
+ *
+ */
+- (void)resetBlock{
+    //将block置空,那么值钱的block将会被内存回收,block已经不存在了,那么它对self的引用也将不会存在
+    self.finishBlock = nil;
+    self.progressBlock = nil;
+}
+
+/**
+ *  暂停下载
+ */
+- (void)pasueDownload;
+{
+    
+    //断开连接,就会取消下载
+    [self.connection cancel];
+    
+    [self.stream close];
+}
+
 /**
  *  下载
  *
@@ -74,14 +90,20 @@
       if(self.currentLength == -1)
       {
           NSLog(@"文件已经下载完成,不要下载了!");
+          //将结果回调给控制器
+          dispatch_async(dispatch_get_main_queue(), ^{
+              self.finishBlock(true,nil);
+              //解决循环引用
+              [self resetBlock];
+          });
           return ;
       }
       
       NSURL *url = [NSURL URLWithString:urlstring];
       
       NSMutableURLRequest *requestM = [NSMutableURLRequest requestWithURL:url];
-        
-          [requestM setValue:[NSString stringWithFormat:@"bytes=%lld-",self.currentLength] forHTTPHeaderField:@"Range"];
+      //range的引号里面的不能更改
+      [requestM setValue:[NSString stringWithFormat:@"bytes=%lld-",self.currentLength] forHTTPHeaderField:@"Range"];
           
       // 其代理方法是由运行循环监听执行的,而子线程的运行默认不开启
       self.connection =
@@ -144,9 +166,7 @@
 
   NSURLResponse *response;
 
-  [NSURLConnection sendSynchronousRequest:request
-                        returningResponse:&response
-                                    error:NULL];
+  [NSURLConnection sendSynchronousRequest:request returningResponse:&response error:NULL];
 
   return response.expectedContentLength;
 }
@@ -184,11 +204,6 @@
  */
 - (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response;
 {
-  /**
-   *  不通过这种方式获取文件大小了,改使用head方式获取
-   */
-  // self.expectedLength = response.expectedContentLength;
-
   NSLog(@"收到响应%@   %lld", response, response.expectedContentLength);
 
   NSString *filePath = @"/Users/xmy/Desktop/sougou.zip";
@@ -222,10 +237,7 @@
         self.progressBlock(proceress);
     });
 
-  //往可变的二进制文件里拼接数据
-  // [self.dataM appendData:data];
-  //将数据存入到需要下载的文件里
-  // [self saveData:data];
+  
 }
 /**
  这次连接结束的时候会调用这个方法
@@ -242,6 +254,8 @@
    //完成的Block
     dispatch_async(dispatch_get_main_queue(), ^{
         self.finishBlock(true,nil);
+        //解决循环引用
+        [self resetBlock];
     });
 }
 /**
@@ -257,30 +271,9 @@
     //失败的Block
     dispatch_async(dispatch_get_main_queue(), ^{
         self.finishBlock(false,error);
+        //解决循环引用
+        [self resetBlock];
     });
 }
 
-/**
- *  暂停下载
- */
-- (void)pasueDownload;
-{
-
-  //断开连接,就会取消下载
-  [self.connection cancel];
-
-  [self.stream close];
-}
-
-#pragma mark - 懒加载
-
-//-(NSMutableData *)dataM{
-//
-//    if(_dataM == nil){
-//
-//        _dataM = [NSMutableData data];
-//
-//    }
-//    return _dataM;
-//}
 @end
