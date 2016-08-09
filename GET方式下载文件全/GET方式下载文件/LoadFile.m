@@ -38,6 +38,8 @@
  */
 @property(nonatomic, strong) NSURLConnection *connection;
 
+@property(nonatomic,copy)void(^progressBlock)(float progress);
+
 @end
 
 @implementation LoadFile
@@ -46,9 +48,11 @@
  *
  *  @param urlstring Url地址
  */
-- (void)loadFileUrlString:(NSString *)urlstring;
+- (void)loadFileUrlString:(NSString *)urlstring progress:(void (^)(float))progress;
 {
 
+    self.progressBlock = progress;
+    
       //下载的操作应该在子线程执行,放在主线程会卡顿
       dispatch_async(dispatch_get_global_queue(0, 0), ^{
       
@@ -205,6 +209,10 @@
   //将数据通过输出流管道写入文件
   //参数1:8位的二进制数据    参数二:写入的最大大小
   [self.stream write:data.bytes maxLength:data.length];
+    
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.progressBlock(proceress);
+    });
 
   //往可变的二进制文件里拼接数据
   // [self.dataM appendData:data];

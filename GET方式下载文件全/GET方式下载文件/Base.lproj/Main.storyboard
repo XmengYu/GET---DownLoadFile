@@ -18,7 +18,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <button opaque="NO" contentMode="scaleAspectFit" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MM3-8A-Bn6">
+                            <button opaque="NO" contentMode="scaleAspectFit" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="MM3-8A-Bn6">
                                 <rect key="frame" x="49" y="97" width="78" height="27"/>
                                 <color key="backgroundColor" red="1" green="0.0" blue="0.50196081400000003" alpha="1" colorSpace="calibratedRGB"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="12"/>
@@ -29,6 +29,12 @@
                                     <action selector="pasue:" destination="BYZ-38-t0r" eventType="touchUpInside" id="6E4-vt-zKV"/>
                                 </connections>
                             </button>
+                            <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" misplaced="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Iwr-eZ-A7c">
+                                <rect key="frame" x="49" y="174" width="488" height="5"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="5" id="t32-l6-nIi"/>
+                                </constraints>
+                            </progressView>
                             <button opaque="NO" contentMode="scaleAspectFit" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="4Mz-Pu-YxE">
                                 <rect key="frame" x="49" y="42" width="78" height="27"/>
                                 <color key="backgroundColor" red="0.0" green="0.50196081400000003" blue="0.25098040700000002" alpha="1" colorSpace="calibratedRGB"/>
@@ -45,8 +51,17 @@
                         <constraints>
                             <constraint firstItem="4Mz-Pu-YxE" firstAttribute="top" secondItem="y3c-jy-aDJ" secondAttribute="bottom" constant="22" id="2x6-Kd-FNh"/>
                             <constraint firstItem="4Mz-Pu-YxE" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="29" id="Ecq-5N-mOg"/>
+                            <constraint firstItem="MM3-8A-Bn6" firstAttribute="top" secondItem="4Mz-Pu-YxE" secondAttribute="bottom" constant="28" id="Hna-gi-3bt"/>
+                            <constraint firstItem="Iwr-eZ-A7c" firstAttribute="top" secondItem="MM3-8A-Bn6" secondAttribute="bottom" constant="50" id="RFM-hJ-rpP"/>
+                            <constraint firstItem="MM3-8A-Bn6" firstAttribute="leading" secondItem="Iwr-eZ-A7c" secondAttribute="leading" id="cTF-GI-OTo"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="Iwr-eZ-A7c" secondAttribute="trailing" constant="43" id="fhi-zU-41D"/>
+                            <constraint firstItem="MM3-8A-Bn6" firstAttribute="leading" secondItem="8bC-Xf-vdC" secondAttribute="leadingMargin" constant="29" id="gZy-2T-DL4"/>
+                            <constraint firstItem="MM3-8A-Bn6" firstAttribute="trailing" secondItem="4Mz-Pu-YxE" secondAttribute="trailing" id="wTo-vP-v8e"/>
                         </constraints>
                     </view>
+                    <connections>
+                        <outlet property="progressView" destination="Iwr-eZ-A7c" id="CIe-Ba-dTF"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="dkx-z0-nzr" sceneMemberID="firstResponder"/>
             </objects>

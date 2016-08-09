@@ -12,6 +12,7 @@
 @interface ViewController ()
 
 @property(nonatomic,strong)LoadFile *loadfile;
+@property (weak, nonatomic) IBOutlet UIProgressView *progressView;
 
 @end
 
@@ -26,7 +27,11 @@
 - (IBAction)downLoadClick:(id)sender {
     
     self.loadfile = [[LoadFile alloc] init];
-    [self.loadfile loadFileUrlString:@"http://127.0.0.1/myWeb/sougou.zip"];
+    [self.loadfile loadFileUrlString:@"http://127.0.0.1/myWeb/sougou.zip"progress:^(float progress) {
+        
+        self.progressView.progress = progress;
+        
+    }];
     
 }
 
