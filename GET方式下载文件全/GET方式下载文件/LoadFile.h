@@ -11,6 +11,14 @@
 @interface LoadFile : NSObject
 
 
-
+/**
+ *  下载
+ *
+ *  @param urlstring Url地址
+ */
 - (void)loadFileUrlString:(NSString *)urlstring;
+/**
+ *  暂停下载
+ */
+-(void)pasueDownload;
 @end

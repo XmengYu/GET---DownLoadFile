@@ -11,6 +11,8 @@
 
 @interface ViewController ()
 
+@property(nonatomic,strong)LoadFile *loadfile;
+
 @end
 
 @implementation ViewController
@@ -18,8 +20,8 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     // Do any additional setup after loading the view, typically from a nib.
-    
 }
+
 //下载按钮
 - (IBAction)downLoadClick:(id)sender {
     
@@ -29,9 +31,12 @@
     
 }
 
-- (void)didReceiveMemoryWarning {
-    [super didReceiveMemoryWarning];
-    // Dispose of any resources that can be recreated.
+//暂停按钮
+- (IBAction)pasue:(id)sender {
+
+    //暂停下载
+    [self.loadfile pasueDownload];
+
 }
 
 @end

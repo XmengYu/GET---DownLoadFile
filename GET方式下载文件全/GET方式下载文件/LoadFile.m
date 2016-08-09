@@ -33,11 +33,28 @@
  */
 @property(strong,nonatomic)NSOutputStream *stream;
 
+/**
+ *  定义连接网络属性
+ */
+@property(nonatomic,strong)NSURLConnection *connection;
+
 
 @end
 
 @implementation LoadFile
-//写分类方法
+/**
+ *  暂停下载
+ */
+-(void)pasueDownload;{
+    
+    //断开连接,就会取消下载
+    [self.connection cancel];
+}
+/**
+ *  下载
+ *
+ *  @param urlstring Url地址
+ */
 - (void)loadFileUrlString:(NSString *)urlstring;
 {
     NSURL *url = [NSURL URLWithString:urlstring];
