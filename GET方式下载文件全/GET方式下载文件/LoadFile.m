@@ -37,8 +37,15 @@
  *  定义连接网络属性
  */
 @property(nonatomic, strong) NSURLConnection *connection;
-
+/**
+ *  将进度返回给控制器
+ */
 @property(nonatomic,copy)void(^progressBlock)(float progress);
+/**
+ *  将下载是否成功的信息返回给控制器
+ */
+@property(nonatomic,copy)void(^finishBlock)(BOOL isSuccess,NSError *error);
+
 
 @end
 
@@ -48,10 +55,11 @@
  *
  *  @param urlstring Url地址
  */
-- (void)loadFileUrlString:(NSString *)urlstring progress:(void (^)(float))progress;
+- (void)loadFileUrlString:(NSString *)urlstring progress:(void (^)(float))progress finish:(void (^)(BOOL, NSError *))finish;
 {
 
-    self.progressBlock = progress;
+      self.progressBlock = progress;
+      self.finishBlock = finish;
     
       //下载的操作应该在子线程执行,放在主线程会卡顿
       dispatch_async(dispatch_get_global_queue(0, 0), ^{
@@ -231,6 +239,10 @@
 
   //在下载响应完成时,将该二进制数据保存到指定的位置,公司开发的话会保存到沙盒,
   //[self.dataM writeToFile:@"/Users/xmy/Desktop/sougou.zip" atomically:true];
+   //完成的Block
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.finishBlock(true,nil);
+    });
 }
 /**
  *  下载失败的方法
@@ -241,6 +253,11 @@
   NSLog(@"下载失败!%@", error);
   //关闭管道
   [self.stream close];
+    
+    //失败的Block
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.finishBlock(false,error);
+    });
 }
 
 /**

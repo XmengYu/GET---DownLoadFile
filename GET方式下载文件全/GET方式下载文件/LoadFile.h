@@ -16,7 +16,7 @@
  *
  *  @param urlstring Url地址
  */
-- (void)loadFileUrlString:(NSString *)urlstring progress:(void(^)(float progress))progress;
+- (void)loadFileUrlString:(NSString *)urlstring progress:(void(^)(float progress))progress finish:(void(^)(BOOL isSuccess,NSError *error))finish;
 /**
  *  暂停下载
  */

@@ -31,6 +31,13 @@
         
         self.progressView.progress = progress;
         
+    }finish:^(BOOL isSuccess, NSError *error) {
+        if(isSuccess)
+        {
+            NSLog(@"提示下载成功");
+        }else{
+            NSLog(@"下载失败%@",error);
+        }
     }];
     
 }
