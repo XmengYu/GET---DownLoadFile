@@ -25,9 +25,8 @@
 //下载按钮
 - (IBAction)downLoadClick:(id)sender {
     
-    NSString *str = @"http://127.0.0.1/myWeb/sougou.zip";
-    //调用分类方法下载文件
-    [[LoadFile new] loadFileUrlString:str];
+    self.loadfile = [[LoadFile alloc] init];
+    [self.loadfile loadFileUrlString:@"http://127.0.0.1/myWeb/sougou.zip"];
     
 }
 
@@ -35,7 +34,8 @@
 - (IBAction)pasue:(id)sender {
 
     //暂停下载
-    [self.loadfile pasueDownload];
+   [self.loadfile pasueDownload];
+    NSLog(@"-----------------------------------------------------------");
 
 }
 
