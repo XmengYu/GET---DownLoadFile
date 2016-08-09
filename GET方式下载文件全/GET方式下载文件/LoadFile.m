@@ -48,33 +48,72 @@
  */
 - (void)loadFileUrlString:(NSString *)urlstring;
 {
-  self.expectedLength = [self getServerFileSize:urlstring];
 
-  NSURL *url = [NSURL URLWithString:urlstring];
+      //下载的操作应该在子线程执行,放在主线程会卡顿
+      dispatch_async(dispatch_get_global_queue(0, 0), ^{
+      
+      self.expectedLength = [self getServerFileSize:urlstring];
 
-  NSURLRequest *request = [NSURLRequest requestWithURL:url];
-
-  //下载的操作应该在子线程执行,放在主线程会卡顿
-  dispatch_async(dispatch_get_global_queue(0, 0), ^{
-    // 其代理方法是由运行循环监听执行的,而子线程的运行默认不开启
-    self.connection =
+      NSString *locateFile = @"/Users/xmy/Desktop/sougou.zip";
+      
+      self.currentLength = [self getLocationFileSize:locateFile];
+      
+      //得到-1,说明已经下载完成,就不要去下载
+      if(self.currentLength == -1)
+      {
+          NSLog(@"文件已经下载完成,不要下载了!");
+          return ;
+      }
+      
+      NSURL *url = [NSURL URLWithString:urlstring];
+      
+      NSURLRequest *request = [NSURLRequest requestWithURL:url];
+      // 其代理方法是由运行循环监听执行的,而子线程的运行默认不开启
+      self.connection =
         [NSURLConnection connectionWithRequest:request delegate:self];
-    // 开启当前线程的运行循环.这个运行循环会在下载完毕之后自动关闭
-    [[NSRunLoop currentRunLoop] run];
-  });
+      // 开启当前线程的运行循环.这个运行循环会在下载完毕之后自动关闭
+      [[NSRunLoop currentRunLoop] run];
+      
+   });
 
-  //    [NSURLConnection sendAsynchronousRequest:request queue:[NSOperationQueue
-  //    mainQueue] completionHandler:^(NSURLResponse * _Nullable response,
-  //    NSData * _Nullable data, NSError * _Nullable connectionError) {
-  //
-  //        if (connectionError != nil || data.length == 0) {
-  //            NSLog(@"错误:%@",connectionError);
-  //            return;
-  //        }
-  //        [data writeToFile:@"/Users/heima/Desktop/sougou.zip"
-  //        atomically:true];
-  //    }];
 }
+- (long long)getLocationFileSize:(NSString *)filePath{
+    
+    //使用文件管理器
+    NSFileManager *manger = [NSFileManager defaultManager];
+    
+    //通过文件管理器,获取文件的属性
+    //如果文件不存在,属性将为nil
+    NSDictionary *attr = [manger attributesOfItemAtPath:filePath error:NULL];
+    
+    //如果文件存在
+    if(attr != nil)
+    {
+        //获取本地文件的大小
+        long long locationSize = attr.fileSize;
+        //如果本地文件大于源文件,删除本地文件,重新下载
+        if(locationSize > self.expectedLength)
+        {
+            [manger removeItemAtPath:filePath error:NULL];
+            //返回0
+            return 0;
+        }
+        //如果本地文件小于源文件,返回文件大小
+        else if(locationSize < self.expectedLength)
+        {
+            return locationSize;
+        }
+        //如果相等,代表文件已经下载完成
+        else{
+            //随意附一个值,当外界得到这个值后,就不要去下载
+            return -1;
+        }
+    }
+    
+    //默认返回为0,代表本地文件没有大小
+    return 0;
+}
+
 /**
  *  使用head请求方式,和url地址来获取服务器大小
  *
@@ -128,8 +167,7 @@
 /**
  *  已经收到响应的时候就会调用这个方法
  */
-- (void)connection:(NSURLConnection *)connection
-didReceiveResponse:(NSURLResponse *)response;
+- (void)connection:(NSURLConnection *)connection didReceiveResponse:(NSURLResponse *)response;
 {
   /**
    *  不通过这种方式获取文件大小了,改使用head方式获取
